@@ -449,10 +449,17 @@ var resizePizzas = function(size) {
   }
 
   // Iterates through pizza elements on the page and changes their widths
+  /*************************************************************************************/
+  /* FIX!!!: the new size calculation can be done only once, since the same value will */
+  /* be applied to all elements. Therefore, the dx and newwidth variables calculations */
+  /* have been taken outside the for loop.                                             */
+  /*************************************************************************************/
   function changePizzaSizes(size) {
+      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[0], size);
+      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[0].offsetWidth + dx) + 'px';
     for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
+//      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
+//      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
       document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
     }
   }
@@ -498,14 +505,28 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 // https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
 
 // Moves the sliding background pizzas based on scroll position
+/****************************************************************************************/
+/* FIX!!!: the bottleneck is caused by the sin calculation being done for all elements. */
+/* Since we only need 5 different phase values for the whole function, we now perform   */
+/* an initial phase calculation for the values from 0 to 4 and store them in a 5-length */
+/* array. We then make use of this phase array to avoid unnecessary sin calculations    */
+/****************************************************************************************/
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
+  // the new 5-length array storing 5 possible values for the phase
+  var phaseArray = [];
+  for (var phaseIndex = 0; phaseIndex < 5; phaseIndex++) {
+    phaseArray.push(Math.sin((document.body.scrollTop / 1250) + (phaseIndex % 5)));
+  }
+
   var items = document.querySelectorAll('.mover');
   for (var i = 0; i < items.length; i++) {
-    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
-    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+//    var phase = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+    // the item position calculation now uses the previously computed array with different
+    // phase values
+    items[i].style.left = items[i].basicLeft + 100 * phaseArray[i % 5] + 'px';
   }
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
