@@ -1,0 +1,5 @@
+Websites visited during this project:
+
+Timing API documentation: http://www.html5rocks.com/en/tutorials/webperformance/usertiming/
+Offset property documentation: http://www.w3schools.com/jsref/prop_element_offsetwidth.asp
+Chrome tips and tricks: https://developer.chrome.com/devtools/docs/tips-and-tricks
